@@ -1,0 +1,7 @@
+---
+systemd: no
+initd: yes
+user: "root"
+group: "root"
+session: "weechat"
+args: ""

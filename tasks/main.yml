@@ -1,0 +1,53 @@
+---
+
+- name: add apt-https
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: add weechat gpg key
+  apt_key:
+    id: "11E9DE8848F2B65222AA75B8D1820DB22A11534E"
+    keyserver: "pool.sks-keyservers.net"
+    state: present
+
+- name: add weechat repo
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  with_items:
+    - "deb https://weechat.org/debian jessie main"
+    - "deb-src https://weechat.org/debian jessie main"
+
+- name: install weechat
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - weechat-curses
+    - weechat-plugins
+    - tmux
+
+- block:
+  - name: install init.d initfile
+    copy:
+      src: init.d
+      dest: /etc/init.d/weechatd
+      owner: root
+      group: root
+      mode: 755
+
+  - name: install init.d defaults file
+    template:
+      src: defaults.init.d.j2
+      dest: /etc/weechatd.conf
+      owner: root
+      group: root
+      mode: 644
+
+  - name: enable service
+    service:
+      name: weechatd
+      enabled: yes
+
+  when: initd
